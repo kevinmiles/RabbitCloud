@@ -190,8 +190,32 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
         #endregion Implementation of IServiceProxyGenerater
 
         #region Private Method
+        private static readonly Dictionary<Type, SyntaxKind> _predefinedTypes = new Dictionary<Type, SyntaxKind>
+        {
+            [typeof(bool)] = SyntaxKind.BoolKeyword,
+            [typeof(byte)] = SyntaxKind.ByteKeyword,
+            [typeof(sbyte)] = SyntaxKind.SByteKeyword,
+            [typeof(short)] = SyntaxKind.ShortKeyword,
+            [typeof(ushort)] = SyntaxKind.UShortKeyword,
+            [typeof(int)] = SyntaxKind.IntKeyword,
+            [typeof(uint)] = SyntaxKind.UIntKeyword,
+            [typeof(long)] = SyntaxKind.LongKeyword,
+            [typeof(ulong)] = SyntaxKind.ULongKeyword,
+            [typeof(double)] = SyntaxKind.DoubleKeyword,
+            [typeof(float)] = SyntaxKind.FloatKeyword,
+            [typeof(decimal)] = SyntaxKind.DecimalKeyword,
+            [typeof(string)] = SyntaxKind.StringKeyword,
+            [typeof(char)] = SyntaxKind.CharKeyword,
+            [typeof(void)] = SyntaxKind.VoidKeyword,
+            [typeof(object)] = SyntaxKind.ObjectKeyword,
+        };
         private static TypeSyntax GetTypeSyntaxAuto(Type type)
         {
+            if (_predefinedTypes.TryGetValue(type, out var predefinedSyntax))
+            {
+                return PredefinedType(Token(predefinedSyntax));
+            }
+
             var ti = type.GetTypeInfo();
             if (ti.IsArray)
             {
