@@ -51,7 +51,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Utilitys
         public static MemoryStream Compile(string assemblyName, AssemblyInfo assemblyInfo, IEnumerable<SyntaxTree> trees, IEnumerable<MetadataReference> references, ILogger logger = null)
         {
             trees = trees.Concat(new[] { GetAssemblyInfo(assemblyInfo) });
-            var compilation = CSharpCompilation.Create(assemblyName, trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            var compilation = CSharpCompilation.Create(assemblyName, trees, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release, allowUnsafe: true));
 
             var stream = new MemoryStream();
             var result = compilation.Emit(stream);
