@@ -121,6 +121,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                     foreach (var g in gArgs)
                     {
                         if (!g.IsGenericParameter) continue;
+
                         var typeParam = TypeParameter(g.Name);
                         var gi = g.GetTypeInfo();
                         var gAttr = gi.GenericParameterAttributes;
@@ -131,11 +132,13 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                         if ((gAttr & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0)
                             constraints.Add(ClassOrStructConstraint(SyntaxKind.StructConstraint));
 
-                        //处理逆变, 协变
+#if false
+                        //处理逆变, 协变(能编译成功, 但class不支持)
                         if ((gAttr & GenericParameterAttributes.Covariant) != 0)
                             typeParam = typeParam.WithVarianceKeyword(Token(SyntaxKind.OutKeyword));
                         if ((gAttr & GenericParameterAttributes.Contravariant) != 0)
                             typeParam = typeParam.WithVarianceKeyword(Token(SyntaxKind.InKeyword));
+#endif
                         typeParameterList.Add(typeParam);
 
                         //base, interface
@@ -187,9 +190,9 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                 .NormalizeWhitespace().SyntaxTree;
         }
 
-        #endregion Implementation of IServiceProxyGenerater
+#endregion Implementation of IServiceProxyGenerater
 
-        #region Private Method
+#region Private Method
         private static readonly Dictionary<Type, SyntaxKind> _predefinedTypes = new Dictionary<Type, SyntaxKind>
         {
             [typeof(bool)] = SyntaxKind.BoolKeyword,
@@ -394,6 +397,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                 parameterDeclarationList.RemoveAt(parameterDeclarationList.Count - 1);
             }
 
+            //TODO: 可能的话, 无Await/Async直接返回
             var declaration = MethodDeclaration(
                 returnDeclaration,
                 Identifier(method.Name))
@@ -410,7 +414,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                     {
                         if (!g.IsGenericParameter) continue;
 
-                        typeParameterList.Add(TypeParameter(g.Name));
+                        var typeParam = TypeParameter(g.Name);
                         var gi = g.GetTypeInfo();
                         var gAttr = gi.GenericParameterAttributes;
                         var constraints = new List<TypeParameterConstraintSyntax>();
@@ -420,11 +424,14 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                         if ((gAttr & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0)
                             constraints.Add(ClassOrStructConstraint(SyntaxKind.StructConstraint));
 
-                        //TODO: 逆变, 协变
+#if false
+                        //处理逆变, 协变(能编译成功, 但class不支持)
                         if ((gAttr & GenericParameterAttributes.Covariant) != 0)
-                            throw new NotSupportedException();
+                            typeParam = typeParam.WithVarianceKeyword(Token(SyntaxKind.OutKeyword));
                         if ((gAttr & GenericParameterAttributes.Contravariant) != 0)
-                            throw new NotSupportedException();
+                            typeParam = typeParam.WithVarianceKeyword(Token(SyntaxKind.InKeyword));
+#endif
+                        typeParameterList.Add(typeParam);
 
                         //base, interface
                         /*if (gi.BaseType != typeof(object))
@@ -463,6 +470,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
             ExpressionSyntax expressionSyntax;
             StatementSyntax statementSyntax;
 
+            //TODO: 支持CancelToken的传递
             //TODO: 尝试下支持同步返回
             if (method.ReturnType.GetTypeInfo().IsGenericType)//!= typeof(Task)
             {
@@ -543,9 +551,14 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                 return null;
             }
         }
+
         public static string GetSafeFullName(this System.Reflection.TypeInfo that)
         {
-            //TODO: 测试下是否可以直接ToString()
+#if true
+            //貌似可以直接ToString()
+            //NOTE: 注意Nested Type的默认分隔符为'+', 做一下替换
+            return that.ToString().Replace('+', '.');
+#else
             if (that.IsGenericParameter)
                 return that.Name;
 
@@ -560,6 +573,20 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
             if (parent == null)
                 return that.Namespace + "." + that.Name;
             return parent.GetTypeInfo().GetSafeFullName() + "." + that.Name;
+#endif
+        }
+
+        /// <summary>
+        /// 获取泛型类型的主名称部分(origName.Split('`')[0]
+        /// </summary>
+        /// <param name="origName"></param>
+        /// <returns></returns>
+        public static string GetNonGenericName(this string origName)
+        {
+            var i = origName.IndexOf('`');
+            if (i >= 0)
+                return origName.Substring(0, i + 1);
+            return origName;
         }
     }
 }

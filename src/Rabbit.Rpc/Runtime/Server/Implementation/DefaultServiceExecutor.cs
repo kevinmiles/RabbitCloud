@@ -96,7 +96,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
             try
             {
                 var result = await entry.Func(remoteInvokeMessage.Parameters);
-                var task = result as Task;
+                dynamic task = result as Task;
 
                 if (task == null)
                 {
@@ -104,9 +104,10 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
                 }
                 else
                 {
-                    task.Wait();
+                    //TODO: 支持所有实现了GetAwaiter的类型
+                    await task;
 
-                    var taskType = task.GetType().GetTypeInfo();
+                    var taskType = result.GetType().GetTypeInfo();
                     if (taskType.IsGenericType)
                         resultMessage.Result = taskType.GetProperty("Result").GetValue(task);
                 }
