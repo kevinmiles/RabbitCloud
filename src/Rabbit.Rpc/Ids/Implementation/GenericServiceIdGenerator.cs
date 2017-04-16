@@ -6,13 +6,13 @@ using System.Reflection;
 namespace Rabbit.Rpc.Ids.Implementation
 {
     /// <summary>
-    /// 一个默认的服务Id生成器。
+    /// 一个改良的服务Id生成器。
     /// </summary>
-    public class DefaultServiceIdGenerator : IServiceIdGenerator
+    public class GenericServiceIdGenerator : IServiceIdGenerator
     {
-        private readonly ILogger<DefaultServiceIdGenerator> _logger;
+        private readonly ILogger<GenericServiceIdGenerator> _logger;
 
-        public DefaultServiceIdGenerator(ILogger<DefaultServiceIdGenerator> logger)
+        public GenericServiceIdGenerator(ILogger<GenericServiceIdGenerator> logger)
         {
             _logger = logger;
         }
@@ -32,12 +32,15 @@ namespace Rabbit.Rpc.Ids.Implementation
             if (type == null)
                 throw new ArgumentNullException(nameof(method.DeclaringType), "方法的定义类型不能为空。");
 
-            var id = $"{type.FullName}.{method.Name}";
+            //FIXME 使用type.FullName时应防止泛型类型中core和framework类型定义的程序集不一样造成的问题
+            //Echo.Common.IUserService`1[[System.Int32, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]].Test
+            var id = $"{type.FullName}.{method.Name}(";
             var parameters = method.GetParameters();
             if (parameters.Any())
             {
-                id += "_" + string.Join("_", parameters.Select(i => i.Name));
+                id += string.Join(",", parameters.Select(i => i.Name));
             }
+            id += ")";
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"为方法：{method}生成服务Id：{id}。");
             return id;
