@@ -93,11 +93,19 @@ namespace Generic.Tests
     [RpcServiceBundle]
     public interface IService
     {
-        //¶à¼¶·ºĞÍ²âÊÔ
+        //å¤šçº§æ³›å‹æµ‹è¯•
         Task<ResultModel<int>> GetData(int i);
-        //ValueTask<T>²âÊÔ
+        //ValueTask<T>æµ‹è¯•
         ValueTask<ResultModel<int>> GetData2(int i);
+        //åŒæ­¥æµ‹è¯•
+        int GetData3(int i);
     }
+    [RpcServiceBundle]
+    public interface IServiceT<T1, T2>
+    {
+
+    }
+
     public class DefService : IService
     {
         public async Task<ResultModel<int>> GetData(int i)
@@ -108,5 +116,7 @@ namespace Generic.Tests
         {
             return new ResultModel<int> { State = 1, Data = 2 };
         }
+
+        public int GetData3(int i) => 0;
     }
 }

@@ -67,6 +67,8 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                         MetadataReference.CreateFromFile(typeof(Task).GetTypeInfo().Assembly.Location)
                     }),
                 _logger);
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug(trees[0].ToString());
 
             using (stream)
             {
@@ -396,12 +398,15 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                 parameterList.RemoveAt(parameterList.Count - 1);
                 parameterDeclarationList.RemoveAt(parameterDeclarationList.Count - 1);
             }
+            //TODO: 识别System.Runtime.CompilerServices.AsyncMethodBuilderAttribute
+            var mayAsyncMethod = typeof(Task).IsAssignableFrom(method.ReturnType) || ("System.Threading.Tasks".Equals(method.ReturnType.Namespace) && "ValueTask`1".Equals(method.ReturnType.Name));
+            var hasRetnValue = method.ReturnType != typeof(void) && method.ReturnType != typeof(Task);
 
             //TODO: 可能的话, 无Await/Async直接返回
             var declaration = MethodDeclaration(
                 returnDeclaration,
                 Identifier(method.Name))
-                .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.AsyncKeyword)))
+                .WithModifiers(mayAsyncMethod ? TokenList(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.AsyncKeyword)) : TokenList(Token(SyntaxKind.PublicKeyword)))
                 .WithParameterList(ParameterList(SeparatedList<ParameterSyntax>(parameterDeclarationList)));
             //TODO: 测试下unsafe的识别(实际不支持)
             {
@@ -471,17 +476,25 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
             StatementSyntax statementSyntax;
 
             //TODO: 支持CancelToken的传递
-            //TODO: 尝试下支持同步返回
-            if (method.ReturnType.GetTypeInfo().IsGenericType)//!= typeof(Task)
+            if (hasRetnValue)//!= typeof(Task)
             {
-                expressionSyntax = GenericName(
-                    Identifier("Invoke")).WithTypeArgumentList(returnDeclaration.GetInnerTypeArgumentList());
+                //TODO: 更好的方式获取内部类型
+                if (mayAsyncMethod && method.ReturnType.GetTypeInfo().IsGenericType)
+                {
+                    expressionSyntax = GenericName(
+                        Identifier("Invoke")).WithTypeArgumentList(returnDeclaration.GetInnerTypeArgumentList());
+                }
+                else
+                {
+                    expressionSyntax = GenericName(
+                        Identifier("Invoke")).WithTypeArgumentList(TypeArgumentList(SeparatedList(new TypeSyntax[] { returnDeclaration })));
+                }
             }
             else
             {
                 expressionSyntax = IdentifierName("Invoke");
             }
-            expressionSyntax = AwaitExpression(
+            expressionSyntax = 
                 InvocationExpression(expressionSyntax)
                     .WithArgumentList(
                         ArgumentList(
@@ -513,15 +526,43 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                                             LiteralExpression(
                                                 SyntaxKind.StringLiteralExpression,
                                                 Literal(serviceId)))
-                                }))));
-
-            if (method.ReturnType != typeof(Task))
+                                })));
+            if (mayAsyncMethod)
             {
-                statementSyntax = ReturnStatement(expressionSyntax);
+                expressionSyntax = AwaitExpression(expressionSyntax);
+            }
+            if (mayAsyncMethod)
+            {
+                //异步
+                if (hasRetnValue)
+                {
+                    statementSyntax = ReturnStatement(expressionSyntax);
+                }
+                else
+                {
+                    statementSyntax = ExpressionStatement(expressionSyntax);
+                }
             }
             else
             {
-                statementSyntax = ExpressionStatement(expressionSyntax);
+                //同步
+                if (hasRetnValue)
+                {
+                    statementSyntax = ReturnStatement(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            expressionSyntax,
+                            IdentifierName("Result")));
+                }
+                else
+                {
+                    statementSyntax = ExpressionStatement(
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                expressionSyntax,
+                                IdentifierName("Wait"))));
+                }
             }
 
             declaration = declaration.WithBody(

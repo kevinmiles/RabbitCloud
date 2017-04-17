@@ -16,6 +16,8 @@ using System.Net;
 using Newtonsoft.Json;
 using Rabbit.Rpc.Ids;
 using Rabbit.Rpc.Ids.Implementation;
+using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace Generic.Tests
 {
@@ -88,6 +90,7 @@ namespace Generic.Tests
                 Console.WriteLine("START>>>");
                 Console.WriteLine("GetData" + JsonConvert.SerializeObject(await userService.GetData(0)));
                 Console.WriteLine("GetData2" + JsonConvert.SerializeObject(await userService.GetData2(0)));
+                Console.WriteLine("GetData3" + JsonConvert.SerializeObject(userService.GetData3(0)));
                 Console.WriteLine("<<<END");
                 Console.ReadLine();
             }
