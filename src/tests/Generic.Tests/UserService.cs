@@ -87,6 +87,20 @@ namespace Generic.Tests
     }
     public class ResultModel<T>
     {
+        public class Nested
+        {
+            public T Data1 { get; set; }
+        }
+        public class NestedBadT<T>
+        {
+            public T Data1 { get; set; }
+            public T Data2 { get; set; }
+        }
+        public class NestedGoodT<T2>
+        {
+            public T Data1 { get; set; }
+            public T2 Data2 { get; set; }
+        }
         public int State { get; set; }
         public T Data { get; set; }
     }
@@ -99,6 +113,15 @@ namespace Generic.Tests
         ValueTask<ResultModel<int>> GetData2(int i);
         //同步测试
         int GetData3(int i);
+        //坏的Nested泛型
+        ResultModel<string>.NestedBadT<int> GetData4(int i);
+        //好的Nested泛型
+        ResultModel<string>.NestedGoodT<int> GetData5(int i);
+        //Nested非泛型
+        ResultModel<string>.Nested GetData6(int i);
+        //没有命名空间的类
+        NoNSClass GetData7(int i);
+        NoNSClassT<NoNSClass> GetData8(int i);
     }
     [RpcServiceBundle]
     public interface IServiceT<T1, T2>
@@ -118,5 +141,22 @@ namespace Generic.Tests
         }
 
         public int GetData3(int i) => 0;
+
+        public ResultModel<string>.NestedBadT<int> GetData4(int i) => new ResultModel<string>.NestedBadT<int>();
+        public ResultModel<string>.NestedGoodT<int> GetData5(int i) => new ResultModel<string>.NestedGoodT<int>();
+        public ResultModel<string>.Nested GetData6(int i) => new ResultModel<string>.Nested();
+        public NoNSClass GetData7(int i) => new NoNSClass();
+        public NoNSClassT<NoNSClass> GetData8(int i) => new NoNSClassT<NoNSClass>();
     }
+}
+
+public class NoNSClass
+{
+    public int Value { get; set; }
+}
+
+public class NoNSClassT<T>
+{
+    public int Value { get; set; }
+    public T Data { get; set; }
 }

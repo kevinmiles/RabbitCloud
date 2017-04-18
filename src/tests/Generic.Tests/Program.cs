@@ -74,7 +74,7 @@ namespace Generic.Tests
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             serviceProvider.GetRequiredService<ILoggerFactory>()
-                .AddConsole((c, l) => (int)l >= 3);
+                .AddConsole(LogLevel.Trace);
 
             var serviceProxyGenerater = serviceProvider.GetRequiredService<IServiceProxyGenerater>();
             var serviceProxyFactory = serviceProvider.GetRequiredService<IServiceProxyFactory>();
@@ -91,6 +91,11 @@ namespace Generic.Tests
                 Console.WriteLine("GetData" + JsonConvert.SerializeObject(await userService.GetData(0)));
                 Console.WriteLine("GetData2" + JsonConvert.SerializeObject(await userService.GetData2(0)));
                 Console.WriteLine("GetData3" + JsonConvert.SerializeObject(userService.GetData3(0)));
+                Console.WriteLine("GetData4" + JsonConvert.SerializeObject(userService.GetData4(0)));
+                Console.WriteLine("GetData5" + JsonConvert.SerializeObject(userService.GetData5(0)));
+                Console.WriteLine("GetData6" + JsonConvert.SerializeObject(userService.GetData6(0)));
+                Console.WriteLine("GetData7" + JsonConvert.SerializeObject(userService.GetData7(0)));
+                Console.WriteLine("GetData8" + JsonConvert.SerializeObject(userService.GetData8(0)));
                 Console.WriteLine("<<<END");
                 Console.ReadLine();
             }
@@ -114,7 +119,7 @@ namespace Generic.Tests
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             serviceProvider.GetRequiredService<ILoggerFactory>()
-                .AddConsole((c, l) => (int)l >= 3);
+                .AddConsole(LogLevel.Trace);
 
             //自动生成服务路由（这边的文件与Echo.Client为强制约束）
             {

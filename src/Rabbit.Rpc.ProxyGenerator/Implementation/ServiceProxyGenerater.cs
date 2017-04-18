@@ -241,40 +241,77 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
                 //已在参数列表中处理
                 throw new NotSupportedException();
             }
+            //处理多级Nested的泛型
+            var genericArgs = ti.GenericTypeArguments;
+            //Nested泛型的参数全部加在了最后一级上面, 且每一级的IsGenericType都为真
+            var genericArgsOff = 0;
 
-            var fullName = ti.GetSafeFullName().Split('`')[0];
-            var parts = fullName.Split('.');
-
-            SimpleNameSyntax baseSyntax;
-            if (ti.IsGenericType)
+            var typeStack = new Stack<System.Reflection.TypeInfo>();
+            //将泛型类型还原成定义
+            var curType = ti.IsGenericType ? ti.GetGenericTypeDefinition().GetTypeInfo() : ti;
+            typeStack.Push(curType);
+            while (curType.IsNested)
             {
-                //泛型类型
-                baseSyntax = GenericName(parts.Last())
-                    .WithTypeArgumentList(
-                        TypeArgumentList(
-                            SeparatedList<TypeSyntax>(
-                                ti.GetGenericArguments()
-                                    .Select(GetTypeSyntaxAuto))));
+                //ReflectedType反射时通过的类(如继承方法, 继承链等), DeclaringType: 定义所在的类
+                curType = curType.DeclaringType.GetTypeInfo();
+                typeStack.Push(curType);
+            }
+
+            var syntaxList = new List<SimpleNameSyntax>();
+
+            while (typeStack.Count > 0)
+            {
+                curType = typeStack.Pop();
+                
+                if (!curType.IsNested && type.Namespace != null)
+                {
+                    var parts = type.Namespace.Split('.');
+                    foreach (var cur in parts)
+                    {
+                        syntaxList.Add(IdentifierName(cur));
+                    }
+                }
+
+                var name = curType.Name;
+                SimpleNameSyntax curSyntax;
+                //看有几个空
+                var genericArgsCount = curType.GenericTypeParameters.Length;
+                var genericArgsCountDelta = genericArgsCount - genericArgsOff;
+
+                if (genericArgsCountDelta > 0)
+                {
+                    //泛型类型
+                    curSyntax = GenericName(name.SplitFirst('`'))
+                        .WithTypeArgumentList(
+                            TypeArgumentList(
+                                SeparatedList<TypeSyntax>(
+                                    genericArgs
+                                        .Skip(genericArgsOff).Take(genericArgsCountDelta)
+                                        .Select(GetTypeSyntaxAuto))));
+                    genericArgsOff = genericArgsCount;
+                }
+                else
+                {
+                    //普通类型
+                    curSyntax = IdentifierName(name);
+                }
+                syntaxList.Add(curSyntax);
+
+            }
+
+            if (syntaxList.Count > 1)
+            {
+                NameSyntax curSyntax = syntaxList[0];
+                for (var i = 1; i < syntaxList.Count; ++i)
+                {
+                    curSyntax = QualifiedName(curSyntax, syntaxList[i]);
+                }
+                return curSyntax;
             }
             else
             {
-                //普通类型
-                baseSyntax = IdentifierName(parts.Last());
+                return syntaxList.FirstOrDefault();
             }
-            NameSyntax curSyntax = baseSyntax;
-            if (parts.Length > 1)
-            {
-                //多段
-                var partsSyntax = parts.Select(IdentifierName).ToArray<SimpleNameSyntax>();
-                var len = partsSyntax.Length;
-                partsSyntax[len - 1] = baseSyntax;
-                curSyntax = partsSyntax[0];
-                for (var i = 1; i < len; ++i)
-                {
-                    curSyntax = QualifiedName(curSyntax, partsSyntax[i]);
-                }
-            }
-            return curSyntax;
         }
 
         private static QualifiedNameSyntax GetQualifiedNameSyntax(string fullName)
@@ -612,22 +649,22 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
             //检查是否为Nested Type
             var parent = that.DeclaringType;
             if (parent == null)
-                return that.Namespace + "." + that.Name;
+            {
+                if (that.Namespace != null)
+                    return that.Namespace + "." + that.Name;
+                else
+                    return that.Name;
+            }
             return parent.GetTypeInfo().GetSafeFullName() + "." + that.Name;
 #endif
         }
 
-        /// <summary>
-        /// 获取泛型类型的主名称部分(origName.Split('`')[0]
-        /// </summary>
-        /// <param name="origName"></param>
-        /// <returns></returns>
-        public static string GetNonGenericName(this string origName)
+        public static string SplitFirst(this string data, char separator)
         {
-            var i = origName.IndexOf('`');
+            var i = data.IndexOf(separator);
             if (i >= 0)
-                return origName.Substring(0, i + 1);
-            return origName;
+                return data.Substring(0, i);
+            return data;
         }
     }
 }
