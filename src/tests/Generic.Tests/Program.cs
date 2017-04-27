@@ -16,8 +16,6 @@ using System.Net;
 using Newtonsoft.Json;
 using Rabbit.Rpc.Ids;
 using Rabbit.Rpc.Ids.Implementation;
-using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 
 namespace Generic.Tests
 {
@@ -44,9 +42,11 @@ namespace Generic.Tests
                         case ConsoleKey.C:
                             StartClient().Wait();
                             break;
+
                         case ConsoleKey.S:
                             StartServer().Wait();
                             break;
+
                         default:
                             dirty = false;
                             break;
@@ -58,9 +58,9 @@ namespace Generic.Tests
                 }
             }
         }
+
         public static async Task StartClient()
         {
-
             var serviceCollection = new ServiceCollection();
 
             serviceCollection
@@ -105,14 +105,15 @@ namespace Generic.Tests
         {
             var serviceCollection = new ServiceCollection();
 
-            serviceCollection
+            var rpcBuilder = serviceCollection
                 .AddLogging()
-                .AddRpcCore()
+                .AddRpcCore();
+            serviceCollection
+                .AddSingleton<IServiceIdGenerator, GenericServiceIdGenerator>();
+            rpcBuilder
                 .AddServiceRuntime()
                 .UseSharedFileRouteManager("d:\\routes.txt")
                 .UseDotNettyTransport();
-            serviceCollection
-                .AddSingleton<IServiceIdGenerator, GenericServiceIdGenerator>();
 
             serviceCollection.AddTransient<IService, DefService>();
 

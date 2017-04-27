@@ -213,8 +213,6 @@ namespace Rabbit.Rpc.Routing.Implementation
 
         private async void _fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation($"文件{_filePath}发生了变更，将重新获取路由信息。");
 
             if (e.ChangeType == WatcherChangeTypes.Changed)
             {
@@ -227,16 +225,14 @@ namespace Rabbit.Rpc.Routing.Implementation
                 {
                     return;
                 }
-                if (!string.IsNullOrWhiteSpace(content))
-                {
-                    await EntryRoutes(_filePath);
-                }
-                else
+                if (string.IsNullOrWhiteSpace(content))
                 {
                     return;
                 }
             }
 
+            if (_logger.IsEnabled(LogLevel.Information))
+                _logger.LogInformation($"文件{_filePath}发生了变更，将重新获取路由信息。");
             await EntryRoutes(_filePath);
         }
 

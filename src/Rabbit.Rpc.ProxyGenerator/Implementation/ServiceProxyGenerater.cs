@@ -239,7 +239,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Implementation
             else if (ti.IsByRef)
             {
                 //已在参数列表中处理
-                throw new NotSupportedException();
+                throw new InvalidOperationException();
             }
             //处理多级Nested的泛型
             var genericArgs = ti.GenericTypeArguments;
