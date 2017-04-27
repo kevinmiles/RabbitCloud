@@ -13,6 +13,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes
     {
         #region Field
 
+        private readonly IServiceProvider _serviceProvider;
         private readonly IEnumerable<Type> _types;
         private readonly IClrServiceEntryFactory _clrServiceEntryFactory;
         private readonly ILogger<AttributeServiceEntryProvider> _logger;
@@ -21,8 +22,9 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes
 
         #region Constructor
 
-        public AttributeServiceEntryProvider(IEnumerable<Type> types, IClrServiceEntryFactory clrServiceEntryFactory, ILogger<AttributeServiceEntryProvider> logger)
+        public AttributeServiceEntryProvider(IServiceProvider serviceProvider, IEnumerable<Type> types, IClrServiceEntryFactory clrServiceEntryFactory, ILogger<AttributeServiceEntryProvider> logger)
         {
+            _serviceProvider = serviceProvider;
             _types = types;
             _clrServiceEntryFactory = clrServiceEntryFactory;
             _logger = logger;
@@ -58,9 +60,26 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Attributes
             var entries = new List<ServiceEntry>();
             foreach (var service in services)
             {
-                foreach (var serviceImplementation in serviceImplementations.Where(i => service.GetTypeInfo().IsAssignableFrom(i)))
+                var knownImpl = _serviceProvider.GetService(service);
+                if (knownImpl != null)
                 {
-                    entries.AddRange(_clrServiceEntryFactory.CreateServiceEntry(service, serviceImplementation));
+                    entries.AddRange(_clrServiceEntryFactory.CreateServiceEntry(service, knownImpl.GetType()));
+                }
+                else
+                {
+                    var serviceImplementation = serviceImplementations.Where(i => service.GetTypeInfo().IsAssignableFrom(i)).ToList();
+                    if (serviceImplementation.Count == 0)
+                    {
+                        _logger.LogWarning($"对服务：{service}, 未手动注册且未发现任何实现, 跳过自动注册。");
+                    }
+                    else if (serviceImplementation.Count > 1)
+                    {
+                        _logger.LogWarning($"对服务：{service}, 未手动注册且发现多于一个实现, 跳过自动注册。");
+                    }
+                    else
+                    {
+                        entries.AddRange(_clrServiceEntryFactory.CreateServiceEntry(service, serviceImplementation[0]));
+                    }
                 }
             }
             return entries;

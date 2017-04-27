@@ -297,7 +297,7 @@ namespace Rabbit.Rpc
 
                 var types = assemblys.Where(i => i.IsDynamic == false).SelectMany(i => i.ExportedTypes).ToArray();
 
-                return new AttributeServiceEntryProvider(types, provider.GetRequiredService<IClrServiceEntryFactory>(),
+                return new AttributeServiceEntryProvider(provider, types, provider.GetRequiredService<IClrServiceEntryFactory>(),
                     provider.GetRequiredService<ILogger<AttributeServiceEntryProvider>>());
             });
             services.AddSingleton<IServiceEntryManager, DefaultServiceEntryManager>();
