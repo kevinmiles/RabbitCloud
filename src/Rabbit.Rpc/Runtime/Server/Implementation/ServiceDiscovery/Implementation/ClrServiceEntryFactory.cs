@@ -46,8 +46,8 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
         {
             foreach (var methodInfo in service.GetTypeInfo().GetMethods())
             {
-                var implementationMethodInfo = serviceImplementation.GetTypeInfo().GetMethod(methodInfo.Name, methodInfo.GetParameters().Select(p => p.ParameterType).ToArray());
-                yield return Create(methodInfo, implementationMethodInfo);
+                //var implementationMethodInfo = serviceImplementation.GetTypeInfo().GetMethod(methodInfo.Name, methodInfo.GetParameters().Select(p => p.ParameterType).ToArray());
+                yield return Create(methodInfo);
             }
         }
 
@@ -55,7 +55,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
 
         #region Private Method
 
-        private ServiceEntry Create(MethodInfo method, MethodBase implementationMethod)
+        private ServiceEntry Create(MethodInfo method)
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
 
@@ -81,7 +81,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
                        var instance = scope.ServiceProvider.GetRequiredService(method.DeclaringType);
 
                        var list = new List<object>();
-                       foreach (var parameterInfo in implementationMethod.GetParameters())
+                       foreach (var parameterInfo in method.GetParameters())
                        {
                            var value = parameters[parameterInfo.Name];
                            var parameterType = parameterInfo.ParameterType;
@@ -90,7 +90,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
                            list.Add(parameter);
                        }
 
-                       var result = implementationMethod.Invoke(instance, list.ToArray());
+                       var result = method.Invoke(instance, list.ToArray());
 
                        return Task.FromResult(result);
                    }

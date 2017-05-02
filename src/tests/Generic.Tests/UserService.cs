@@ -141,6 +141,12 @@ namespace Generic.Tests
         NoNSClass GetData7(int i);
 
         NoNSClassT<NoNSClass> GetData8(int i);
+
+        int TestOverride1(int right);
+
+        int TestOverride2(int right);
+
+        int TestOverride3(int right);
     }
 
     [RpcServiceBundle]
@@ -148,7 +154,7 @@ namespace Generic.Tests
     {
     }
 
-    public class DefService : IService
+    public class DefService2 : IService
     {
         public async Task<ResultModel<int>> GetData(int i)
         {
@@ -171,9 +177,40 @@ namespace Generic.Tests
         public NoNSClass GetData7(int i) => new NoNSClass();
 
         public NoNSClassT<NoNSClass> GetData8(int i) => new NoNSClassT<NoNSClass>();
+
+        int IService.TestOverride1(int left1)
+        {
+            return left1;
+        }
+
+        public virtual int TestOverride2(int left1)
+        {
+            throw new InvalidOperationException("Should NOT call this!!!");
+        }
+
+        public int TestOverride3(int left1)
+        {
+            return left1;
+        }
     }
 
-    public class DefService2 : DefService, IService { }
+    public class DefService : DefService2
+    {
+        public int TestOverride1(int left2)
+        {
+            throw new InvalidOperationException("Should NOT call this!!!");
+        }
+
+        public override int TestOverride2(int left2)
+        {
+            return left2;
+        }
+
+        public new int TestOverride3(int left2)
+        {
+            throw new InvalidOperationException("Should NOT call this!!!");
+        }
+    }
 }
 
 public class NoNSClass

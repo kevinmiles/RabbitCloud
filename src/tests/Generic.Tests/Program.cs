@@ -96,6 +96,9 @@ namespace Generic.Tests
                 Console.WriteLine("GetData6" + JsonConvert.SerializeObject(userService.GetData6(0)));
                 Console.WriteLine("GetData7" + JsonConvert.SerializeObject(userService.GetData7(0)));
                 Console.WriteLine("GetData8" + JsonConvert.SerializeObject(userService.GetData8(0)));
+                Console.WriteLine("TestOverride1" + JsonConvert.SerializeObject(userService.TestOverride1(10086)));
+                Console.WriteLine("TestOverride2" + JsonConvert.SerializeObject(userService.TestOverride2(10086)));
+                Console.WriteLine("TestOverride3" + JsonConvert.SerializeObject(userService.TestOverride3(10086)));
                 Console.WriteLine("<<<END");
                 Console.ReadLine();
             }
