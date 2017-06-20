@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\shared.props" />
+
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>Rabbit.Rpc.ClientGenerator</AssemblyName>

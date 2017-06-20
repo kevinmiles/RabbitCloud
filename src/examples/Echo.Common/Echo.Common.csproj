@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\shared.props" />
+
   <PropertyGroup>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>
     <AssemblyName>Echo.Common</AssemblyName>
@@ -9,6 +11,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

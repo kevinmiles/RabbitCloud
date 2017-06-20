@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\shared.props" />
+
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>Generic.Tests</AssemblyName>
@@ -11,6 +13,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

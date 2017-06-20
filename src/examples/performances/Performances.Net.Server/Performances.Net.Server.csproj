@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\..\shared.props" />
+
   <PropertyGroup>
     <TargetFramework>net451</TargetFramework>
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
@@ -9,6 +11,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

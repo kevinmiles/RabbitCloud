@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\..\shared.props" />
+
   <PropertyGroup>
     <Description>基于ZooKeeper的Rpc服务协调扩展。</Description>
     <Copyright>© RabbitHub. All rights reserved.</Copyright>
-    <VersionPrefix>1.0.0-alpha1</VersionPrefix>
     <Authors>majian</Authors>
     <TargetFrameworks>net45;net451;netstandard1.6</TargetFrameworks>
     <AssemblyName>Rabbit.Rpc.Coordinate.Zookeeper</AssemblyName>
