@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26401.1
+VisualStudioVersion = 15.0.26621.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3234A92D-1575-464E-8C29-4EA29FF8EBF4}"
 EndProject
@@ -54,6 +54,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Performances.Net.Client", "src\examples\performances\Performances.Net.Client\Performances.Net.Client.csproj", "{9F43167B-C87A-4B94-8A0F-CAE853B89619}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Generic.Tests", "src\tests\Generic.Tests\Generic.Tests.csproj", "{2F0957E6-6BDD-4A0F-A112-F668C09416AE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rabbit.Rpc.Ex", "src\Rabbit.Rpc.Ex\Rabbit.Rpc.Ex.csproj", "{766E0107-B0A4-47BB-8230-152BF0F92D87}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,6 +123,10 @@ Global
 		{2F0957E6-6BDD-4A0F-A112-F668C09416AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F0957E6-6BDD-4A0F-A112-F668C09416AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F0957E6-6BDD-4A0F-A112-F668C09416AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{766E0107-B0A4-47BB-8230-152BF0F92D87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{766E0107-B0A4-47BB-8230-152BF0F92D87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{766E0107-B0A4-47BB-8230-152BF0F92D87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{766E0107-B0A4-47BB-8230-152BF0F92D87}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -151,5 +157,9 @@ Global
 		{C5D5EC50-2C75-437E-A019-672442F89362} = {5BF47E16-B6D0-4D9C-A576-F91109C0B1F1}
 		{9F43167B-C87A-4B94-8A0F-CAE853B89619} = {5BF47E16-B6D0-4D9C-A576-F91109C0B1F1}
 		{2F0957E6-6BDD-4A0F-A112-F668C09416AE} = {0E82C06D-56BA-47EB-8374-1A0351B31A30}
+		{766E0107-B0A4-47BB-8230-152BF0F92D87} = {3234A92D-1575-464E-8C29-4EA29FF8EBF4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1E0A129A-4F32-482B-B308-574B95BE1D18}
 	EndGlobalSection
 EndGlobal
