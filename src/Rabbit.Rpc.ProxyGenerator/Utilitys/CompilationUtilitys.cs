@@ -38,7 +38,7 @@ namespace Rabbit.Rpc.ProxyGenerator.Utilitys
                 MetadataReference.CreateFromFile(typeof(Task).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(ServiceDescriptor).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(IRemoteInvokeService).GetTypeInfo().Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(IServiceProxyGenerater).GetTypeInfo().Assembly.Location)
+                //MetadataReference.CreateFromFile(typeof(IServiceProxyGenerater).GetTypeInfo().Assembly.Location)
             }.Concat(references);
             return Compile(AssemblyInfo.Create("Rabbit.Rpc.ClientProxys"), trees, references, logger);
         }

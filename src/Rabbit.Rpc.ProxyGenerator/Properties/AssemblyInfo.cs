@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
@@ -16,3 +17,7 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("5105cb2c-5bfa-4106-84e9-f1101323c560")]
+
+[assembly: TypeForwardedTo(typeof(Rabbit.Rpc.ProxyGenerator.Implementation.ServiceProxyBase))]
+[assembly: TypeForwardedTo(typeof(Rabbit.Rpc.ProxyGenerator.Implementation.ServiceProxyFactory))]
+[assembly: TypeForwardedTo(typeof(Rabbit.Rpc.ProxyGenerator.IServiceProxyFactory))]
