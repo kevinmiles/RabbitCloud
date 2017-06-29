@@ -110,6 +110,7 @@ namespace Rabbit.Rpc
                 }
 
             }
+            _routes = newRoutes;
         }
 
         #endregion Overrides of ServiceRouteManagerBase

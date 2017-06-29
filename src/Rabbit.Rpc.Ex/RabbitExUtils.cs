@@ -4,6 +4,7 @@ using Rabbit.Rpc.Routing;
 using Rabbit.Rpc.Runtime.Client;
 using Rabbit.Rpc.Runtime.Client.Implementation;
 using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery;
+using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +19,11 @@ namespace Rabbit.Rpc
         public static IRpcBuilder UseSpecialServiceRouteManager(this IRpcBuilder builder)
             => builder.UseRouteManager<SpecialServiceRouteManager>();
 
-        public static IRpcBuilder RegistRabbitEx(this IRpcBuilder builder)
+        public static IRpcBuilder RegistRabbitExClientRuntime(this IRpcBuilder builder)
         {
             builder.UseSpecialServiceRouteManager();
+            //属于ServiceRuntime的一部分, 但在RegistRemoteServiceEx中会用到
+            builder.Services.AddSingleton<IClrServiceEntryFactory, ClrServiceEntryFactory>();
             builder.Services.AddSingleton<IRemoteInvokeService, SpecialRemoteInvokeService>();
             return builder;
         }
@@ -116,10 +119,10 @@ namespace Rabbit.Rpc
             var _remoteInvokeService = serviceProvider.GetRequiredService<IRemoteInvokeService>();
             var _typeConvertibleService = serviceProvider.GetRequiredService<ITypeConvertibleService>();
             if (string.IsNullOrEmpty(channel))
-                return (TService)proxyType.GetTypeInfo().GetConstructor(new Type[] { typeof(IRemoteInvokeService), typeof(ITypeConvertibleProvider) })
+                return (TService)proxyType.GetTypeInfo().GetConstructor(new Type[] { typeof(IRemoteInvokeService), typeof(ITypeConvertibleService) })
                     .Invoke(new object[] { _remoteInvokeService, _typeConvertibleService });
 
-            return (TService)proxyType.GetTypeInfo().GetConstructor(new Type[] { typeof(IRemoteInvokeService), typeof(ITypeConvertibleProvider), typeof(string) })
+            return (TService)proxyType.GetTypeInfo().GetConstructor(new Type[] { typeof(IRemoteInvokeService), typeof(ITypeConvertibleService), typeof(string) })
                 .Invoke(new object[] { _remoteInvokeService, _typeConvertibleService, channel });
         }
 
