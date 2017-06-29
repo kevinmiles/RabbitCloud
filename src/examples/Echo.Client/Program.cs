@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Rabbit.Transport.DotNetty;
+using Rabbit.Rpc.Convertibles;
 
 namespace Echo.Client
 {
@@ -68,6 +69,25 @@ namespace Echo.Client
                 }).Wait();
                 Console.ReadLine();
             }
+        }
+    }
+
+    /// <summary>
+    /// 服务代理工厂扩展。
+    /// </summary>
+    public static class ServiceProxyFactoryExExtensions
+    {
+        private static readonly Type[] ctorTypes = new Type[] { typeof(Rabbit.Rpc.Runtime.Client.IRemoteInvokeService), typeof(ITypeConvertibleService) };
+        /// <summary>
+        /// 创建服务代理。
+        /// </summary>
+        /// <typeparam name="T">服务接口类型。</typeparam>
+        /// <param name="serviceProxyFactory">服务代理工厂。</param>
+        /// <param name="proxyType">代理类型。</param>
+        /// <returns>服务代理实例。</returns>
+        public static T CreateProxySpecial<T>(this IServiceProvider serviceProvider, Type proxyType, params System.Net.EndPoint[] endPoints)
+        {
+            return (T)proxyType.GetConstructor(ctorTypes).Invoke(new object[] { new object(), serviceProvider.GetService<ITypeConvertibleService>() });
         }
     }
 }

@@ -4,7 +4,7 @@ using Rabbit.Rpc.Runtime.Client;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Rabbit.Rpc
+namespace Rabbit.Rpc.ProxyGenerator.Implementation
 {
     /// <summary>
     /// 一个抽象的服务代理基类。
@@ -46,13 +46,13 @@ namespace Rabbit.Rpc
         /// <returns>调用结果。</returns>
         protected async Task<T> Invoke<T>(IDictionary<string, object> parameters, string serviceId)
         {
-            serviceId = RabbitExUtils.GenServiceIdWithChannel(serviceId, _channel);
             var message = await _remoteInvokeService.InvokeAsync(new RemoteInvokeContext
             {
-                InvokeMessage = new RemoteInvokeMessage
+                InvokeMessage = new SpecialRemoteInvokeMessage
                 {
                     Parameters = parameters,
-                    ServiceId = serviceId
+                    ServiceId = serviceId,
+                    LocalServiceId = _channel != null ? RabbitExUtils.GenServiceIdWithChannel(serviceId, _channel) : null
                 }
             });
 
@@ -75,10 +75,11 @@ namespace Rabbit.Rpc
             serviceId = RabbitExUtils.GenServiceIdWithChannel(serviceId, _channel);
             await _remoteInvokeService.InvokeAsync(new RemoteInvokeContext
             {
-                InvokeMessage = new RemoteInvokeMessage
+                InvokeMessage = new SpecialRemoteInvokeMessage
                 {
                     Parameters = parameters,
-                    ServiceId = serviceId
+                    ServiceId = serviceId,
+                    LocalServiceId = _channel != null ? RabbitExUtils.GenServiceIdWithChannel(serviceId, _channel) : null
                 }
             });
         }

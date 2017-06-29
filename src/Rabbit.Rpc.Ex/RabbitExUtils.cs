@@ -2,6 +2,7 @@
 using Rabbit.Rpc.Convertibles;
 using Rabbit.Rpc.Routing;
 using Rabbit.Rpc.Runtime.Client;
+using Rabbit.Rpc.Runtime.Client.Implementation;
 using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,9 @@ namespace Rabbit.Rpc
 
         public static IRpcBuilder RegistRabbitEx(this IRpcBuilder builder)
         {
-            return builder.UseSpecialServiceRouteManager();
+            builder.UseSpecialServiceRouteManager();
+            builder.Services.AddSingleton<IRemoteInvokeService, SpecialRemoteInvokeService>();
+            return builder;
         }
 
         /// <summary>
@@ -34,6 +37,21 @@ namespace Rabbit.Rpc
             where TImplementation : class, TService
         {
             builder.Services.AddSingleton<TService, TImplementation>();
+            return builder;
+        }
+
+        /// <summary>
+        /// [服务端用]
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <typeparam name="TImplementation"></typeparam>
+        /// <param name="builder"></param>
+        /// <returns></returns>
+        public static IRpcBuilder RegistLocalService<TService, TImplementation>(this IRpcBuilder builder, Func<IServiceProvider, TImplementation> factory)
+            where TService : class
+            where TImplementation : class, TService
+        {
+            builder.Services.AddSingleton<TService, TImplementation>(factory);
             return builder;
         }
 
