@@ -13,7 +13,7 @@
     <PackageIconUrl>http://www.rabbithub.com/icon.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/RabbitTeam/Rpc</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/RabbitTeam/Rpc/blob/master/LICENSE</PackageLicenseUrl>
-    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
