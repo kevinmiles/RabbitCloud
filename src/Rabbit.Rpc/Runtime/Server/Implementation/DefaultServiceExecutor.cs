@@ -49,6 +49,10 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
             catch (Exception exception)
             {
                 _logger.LogError("将接收到的消息反序列化成 TransportMessage<RemoteInvokeMessage> 时发送了错误。", exception);
+
+                var errMsg = "将接收到的消息反序列化成 TransportMessage<RemoteInvokeMessage> 时发送了错误。" + exception;
+                //向客户端发送调用结果。
+                await SendRemoteInvokeResult(sender, message.Id, new RemoteInvokeResultMessage { ExceptionMessage = errMsg });
                 return;
             }
 
@@ -56,8 +60,12 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
 
             if (entry == null)
             {
+                var errMsg = $"根据服务Id：{remoteInvokeMessage.ServiceId}，找不到服务条目。";
                 if (_logger.IsEnabled(LogLevel.Error))
-                    _logger.LogError($"根据服务Id：{remoteInvokeMessage.ServiceId}，找不到服务条目。");
+                    _logger.LogError(errMsg);
+
+                //向客户端发送调用结果。
+                await SendRemoteInvokeResult(sender, message.Id, new RemoteInvokeResultMessage { ExceptionMessage = errMsg });
                 return;
             }
 
