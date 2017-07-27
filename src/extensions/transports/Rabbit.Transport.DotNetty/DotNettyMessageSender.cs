@@ -48,7 +48,7 @@ namespace Rabbit.Transport.DotNetty
         {
             try
             {
-                await _channel.DisconnectAsync().ConfigureAwait(false);
+                await _channel.CloseAsync().ConfigureAwait(false);
             }
             catch { }
         }
