@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Rabbit.Rpc\Rabbit.Rpc.csproj" />
-    <PackageReference Include="protobuf-net" Version="2.1.0" />
+    <PackageReference Include="protobuf-net" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

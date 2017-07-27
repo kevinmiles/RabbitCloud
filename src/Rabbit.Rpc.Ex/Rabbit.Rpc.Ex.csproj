@@ -41,9 +41,4 @@
     <DefineConstants>$(DefineConstants);NET</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.1.0" />
-  </ItemGroup>
-
 </Project>
