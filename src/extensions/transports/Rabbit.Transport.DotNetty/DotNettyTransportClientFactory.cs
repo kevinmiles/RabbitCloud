@@ -142,8 +142,10 @@ namespace Rabbit.Transport.DotNetty
 
             public override void ChannelInactive(IChannelHandlerContext context)
             {
-                _factory._clients.TryRemove(context.Channel.GetAttribute(origEndPointKey).Get(), out var value);
-                (value.Value as IDisposable)?.Dispose();
+                if (_factory._clients.TryRemove(context.Channel.GetAttribute(origEndPointKey).Get(), out var value))
+                {
+                    (value.Value as IDisposable)?.Dispose();
+                }
             }
 
             public override void ChannelRead(IChannelHandlerContext context, object message)
@@ -154,6 +156,8 @@ namespace Rabbit.Transport.DotNetty
                 var messageSender = context.Channel.GetAttribute(messageSenderKey).Get();
                 messageListener.OnReceived(messageSender, transportMessage);
             }
+
+            public override void ExceptionCaught(IChannelHandlerContext context, Exception exception) => context.CloseAsync();
 
             #endregion Overrides of ChannelHandlerAdapter
         }

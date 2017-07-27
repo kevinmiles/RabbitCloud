@@ -91,7 +91,7 @@ namespace Rabbit.Transport.DotNetty
         {
             try
             {
-                await _channel.DisconnectAsync().ConfigureAwait(false);
+                await _channel.CloseAsync().ConfigureAwait(false);
             }
             catch { }
         }
@@ -132,6 +132,7 @@ namespace Rabbit.Transport.DotNetty
             {
                 if (_logger.IsEnabled(LogLevel.Error))
                     _logger.LogError($"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。", exception);
+                context.CloseAsync();
             }
 
             #endregion Overrides of ChannelHandlerAdapter
