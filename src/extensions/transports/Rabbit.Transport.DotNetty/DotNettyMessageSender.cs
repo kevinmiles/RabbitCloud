@@ -44,12 +44,13 @@ namespace Rabbit.Transport.DotNetty
         #region Implementation of IDisposable
 
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
-        public void Dispose()
+        public async void Dispose()
         {
-            Task.Run(async () =>
+            try
             {
-                await _channel.DisconnectAsync();
-            }).Wait();
+                await _channel.DisconnectAsync().ConfigureAwait(false);
+            }
+            catch { }
         }
 
         #endregion Implementation of IDisposable

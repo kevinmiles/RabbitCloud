@@ -88,13 +88,13 @@ namespace Rabbit.Rpc.Transport.Implementation
         /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
         public void Dispose()
         {
-            (_messageSender as IDisposable)?.Dispose();
-            (_messageListener as IDisposable)?.Dispose();
-
             foreach (var taskCompletionSource in _resultDictionary.Values)
             {
                 taskCompletionSource.TrySetCanceled();
             }
+
+            (_messageSender as IDisposable)?.Dispose();
+            (_messageListener as IDisposable)?.Dispose();
         }
 
         #endregion Implementation of IDisposable
