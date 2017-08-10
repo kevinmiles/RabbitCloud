@@ -64,7 +64,7 @@ namespace Rabbit.Transport.DotNetty
             var bootstrap = new ServerBootstrap();
             bootstrap
                 .Group(bossGroup, workerGroup)
-                .Channel<TcpServerSocketChannel>()
+                .Channel<MyTcpServerSocketChannel>()
                 .Option(ChannelOption.SoBacklog, 100)
                 .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
                 {
@@ -136,6 +136,13 @@ namespace Rabbit.Transport.DotNetty
             }
 
             #endregion Overrides of ChannelHandlerAdapter
+        }
+
+        private class MyTcpServerSocketChannel : TcpServerSocketChannel
+        {
+            private static readonly ChannelMetadata METADATA = new ChannelMetadata(false);
+
+            public override ChannelMetadata Metadata => METADATA;
         }
 
         #endregion Help Class
