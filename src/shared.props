@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
     <VersionPrefix>1.0.7</VersionPrefix>
-    <VersionSuffix>alpha-yyj-pre</VersionSuffix>
+    <VersionSuffix>alpha-yyj</VersionSuffix>
   </PropertyGroup>
 </Project>
