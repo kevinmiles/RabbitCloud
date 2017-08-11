@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rabbit.Rpc.Runtime.Server
@@ -12,7 +13,7 @@ namespace Rabbit.Rpc.Runtime.Server
         /// <summary>
         /// 执行委托。
         /// </summary>
-        public Func<IDictionary<string, object>, Task<object>> Func { get; set; }
+        public Func<IDictionary<string, object>, CancellationToken, Task<object>> Func { get; set; }
 
         /// <summary>
         /// 服务描述符。

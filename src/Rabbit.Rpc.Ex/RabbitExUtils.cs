@@ -5,6 +5,8 @@ using Rabbit.Rpc.Runtime.Client;
 using Rabbit.Rpc.Runtime.Client.Implementation;
 using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery;
 using Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementation;
+using Rabbit.Rpc.Serialization;
+using Rabbit.Rpc.Serialization.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +21,17 @@ namespace Rabbit.Rpc
         public static IRpcBuilder UseSpecialServiceRouteManager(this IRpcBuilder builder)
             => builder.UseRouteManager<SpecialServiceRouteManager>();
 
+        public static IRpcBuilder RegistRabbitExServerRuntime(this IRpcBuilder builder)
+        {
+            builder.UseSpecialServiceRouteManager();
+            builder.Services.AddSingleton<ISerializer<string>, JsonExSerializer>();
+            return builder;
+        }
+
         public static IRpcBuilder RegistRabbitExClientRuntime(this IRpcBuilder builder)
         {
             builder.UseSpecialServiceRouteManager();
+            builder.Services.AddSingleton<ISerializer<string>, JsonExSerializer>();
             //属于ServiceRuntime的一部分, 但在RegistRemoteServiceEx中会用到
             builder.Services.AddSingleton<IClrServiceEntryFactory, ClrServiceEntryFactory>();
             builder.Services.AddSingleton<IRemoteInvokeService, SpecialRemoteInvokeService>();

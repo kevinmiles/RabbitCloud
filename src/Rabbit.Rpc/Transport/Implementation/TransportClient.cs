@@ -4,6 +4,7 @@ using Rabbit.Rpc.Messages;
 using Rabbit.Rpc.Runtime.Server;
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rabbit.Rpc.Transport.Implementation
@@ -46,17 +47,18 @@ namespace Rabbit.Rpc.Transport.Implementation
         /// </summary>
         /// <param name="message">远程调用消息模型。</param>
         /// <returns>远程调用消息的传输消息。</returns>
-        public async Task<RemoteInvokeResultMessage> SendAsync(RemoteInvokeMessage message)
+        public async Task<RemoteInvokeResultMessage> SendAsync(RemoteInvokeMessage message, CancellationToken cancellationToken)
         {
             try
             {
                 if (_logger.IsEnabled(LogLevel.Debug))
                     _logger.LogDebug("准备发送消息。");
 
+                message.CanBeCanceled = cancellationToken.CanBeCanceled;
                 var transportMessage = TransportMessage.CreateInvokeMessage(message);
 
                 //注册结果回调
-                var callbackTask = RegisterResultCallbackAsync(transportMessage.Id);
+                var callbackTask = RegisterResultCallbackAsync(transportMessage.Id, cancellationToken);
 
                 try
                 {
@@ -106,13 +108,34 @@ namespace Rabbit.Rpc.Transport.Implementation
         /// </summary>
         /// <param name="id">消息Id。</param>
         /// <returns>远程调用结果消息模型。</returns>
-        private async Task<RemoteInvokeResultMessage> RegisterResultCallbackAsync(string id)
+        private async Task<RemoteInvokeResultMessage> RegisterResultCallbackAsync(string id, CancellationToken cancellationToken)
         {
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备获取Id为：{id}的响应内容。");
 
             var task = new TaskCompletionSource<TransportMessage>();
             _resultDictionary.TryAdd(id, task);
+            cancellationToken.Register(async() =>
+            {
+                if (task.TrySetCanceled(/*cancellationToken*/))
+                {
+                    var cancelMessage = TransportMessage.CreateCancelMessage(id, new RemoteCancelMessage());
+                    try
+                    {
+                        //发送
+                        await _messageSender.SendAndFlushAsync(cancelMessage);
+                    }
+                    catch (Exception exception)
+                    {
+                        if (_logger.IsEnabled(LogLevel.Warning))
+                            _logger.LogWarning("与服务端通讯时发生了异常。", exception);
+                        return;
+                    }
+
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                        _logger.LogDebug("取消消息发送成功。");
+                }
+            });
             try
             {
                 var result = await task.Task;

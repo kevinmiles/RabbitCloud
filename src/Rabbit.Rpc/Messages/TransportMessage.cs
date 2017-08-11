@@ -54,6 +54,15 @@ namespace Rabbit.Rpc.Messages
         }
 
         /// <summary>
+        /// 是否取消消息。
+        /// </summary>
+        /// <returns>如果是则返回true，否则返回false。</returns>
+        public bool IsCancelMessage()
+        {
+            return ContentType == typeof(RemoteCancelMessage).FullName;
+        }
+
+        /// <summary>
         /// 获取内容。
         /// </summary>
         /// <typeparam name="T">内容类型。</typeparam>
@@ -85,6 +94,19 @@ namespace Rabbit.Rpc.Messages
         public static TransportMessage CreateInvokeResultMessage(string id, RemoteInvokeResultMessage invokeResultMessage)
         {
             return new TransportMessage(invokeResultMessage)
+            {
+                Id = id
+            };
+        }
+
+        /// <summary>
+        /// 创建一个调用传输消息。
+        /// </summary>
+        /// <param name="invokeMessage">调用实例。</param>
+        /// <returns>调用传输消息。</returns>
+        public static TransportMessage CreateCancelMessage(string id, RemoteCancelMessage invokeMessage)
+        {
+            return new TransportMessage(invokeMessage)
             {
                 Id = id
             };

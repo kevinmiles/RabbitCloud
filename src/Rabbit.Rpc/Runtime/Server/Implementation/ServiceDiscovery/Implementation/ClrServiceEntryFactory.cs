@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementation
@@ -73,7 +74,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
             return new ServiceEntry
             {
                 Descriptor = serviceDescriptor,
-                Func = parameters =>
+                Func = (parameters, ct) =>
                {
                    var serviceScopeFactory = _serviceProvider.GetRequiredService<IServiceScopeFactory>();
                    using (var scope = serviceScopeFactory.CreateScope())
@@ -83,8 +84,13 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation.ServiceDiscovery.Implementati
                        var list = new List<object>();
                        foreach (var parameterInfo in method.GetParameters())
                        {
-                           var value = parameters[parameterInfo.Name];
                            var parameterType = parameterInfo.ParameterType;
+                           if (parameterType == typeof(CancellationToken))
+                           {
+                               list.Add(ct);
+                               continue;
+                           }
+                           var value = parameters[parameterInfo.Name];
 
                            var parameter = _typeConvertibleService.Convert(value, parameterType);
                            list.Add(parameter);

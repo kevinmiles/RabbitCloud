@@ -63,7 +63,7 @@ namespace Rabbit.Rpc.Runtime.Client.Implementation
                     _logger.LogDebug($"使用地址：'{endPoint}'进行调用。");
 
                 var client = _transportClientFactory.CreateClient(endPoint);
-                return await client.SendAsync(invokeMessage);
+                return await client.SendAsync(invokeMessage, cancellationToken);
             }
             catch (RpcCommunicationException)
             {

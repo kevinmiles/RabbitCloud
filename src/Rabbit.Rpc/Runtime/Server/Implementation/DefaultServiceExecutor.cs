@@ -2,7 +2,9 @@
 using Rabbit.Rpc.Messages;
 using Rabbit.Rpc.Transport;
 using System;
+using System.Collections.Concurrent;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rabbit.Rpc.Runtime.Server.Implementation
@@ -13,6 +15,9 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
 
         private readonly IServiceEntryLocate _serviceEntryLocate;
         private readonly ILogger<DefaultServiceExecutor> _logger;
+
+        private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellationDictionary =
+            new ConcurrentDictionary<string, CancellationTokenSource>();
 
         #endregion Field
 
@@ -38,8 +43,19 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger.LogInformation("接收到消息。");
 
+
             if (!message.IsInvokeMessage())
-                return;
+            {
+                if (!message.IsCancelMessage())
+                    return;
+
+                CancellationTokenSource cts;
+                if (_cancellationDictionary.TryGetValue(message.Id, out cts))
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                }
+            }
 
             RemoteInvokeMessage remoteInvokeMessage;
             try
@@ -74,11 +90,22 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
 
             var resultMessage = new RemoteInvokeResultMessage();
 
+            CancellationToken ct;
+            if (remoteInvokeMessage.CanBeCanceled)
+            {
+                var cts = new CancellationTokenSource();
+                _cancellationDictionary[message.Id] = cts;
+                ct = cts.Token;
+            }
+            else
+            {
+                ct = default(CancellationToken);
+            }
             //是否需要等待执行。
             if (entry.Descriptor.WaitExecution())
             {
                 //执行本地代码。
-                await LocalExecuteAsync(entry, remoteInvokeMessage, resultMessage);
+                await LocalExecuteAsync(entry, remoteInvokeMessage, resultMessage, ct);
                 //向客户端发送调用结果。
                 await SendRemoteInvokeResult(sender, message.Id, resultMessage);
             }
@@ -90,7 +117,7 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
                 await Task.Factory.StartNew(async () =>
                 {
                     //执行本地代码。
-                    await LocalExecuteAsync(entry, remoteInvokeMessage, resultMessage);
+                    await LocalExecuteAsync(entry, remoteInvokeMessage, resultMessage, ct);
                 }, TaskCreationOptions.LongRunning);
             }
         }
@@ -99,11 +126,11 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
 
         #region Private Method
 
-        private async Task LocalExecuteAsync(ServiceEntry entry, RemoteInvokeMessage remoteInvokeMessage, RemoteInvokeResultMessage resultMessage)
+        private async Task LocalExecuteAsync(ServiceEntry entry, RemoteInvokeMessage remoteInvokeMessage, RemoteInvokeResultMessage resultMessage, CancellationToken ct)
         {
             try
             {
-                var result = await entry.Func(remoteInvokeMessage.Parameters);
+                var result = await entry.Func(remoteInvokeMessage.Parameters, ct);
                 dynamic task = result as Task;
 
                 if (task == null)

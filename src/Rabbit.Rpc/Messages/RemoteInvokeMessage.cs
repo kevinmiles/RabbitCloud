@@ -16,5 +16,7 @@ namespace Rabbit.Rpc.Messages
         /// 服务参数。
         /// </summary>
         public IDictionary<string, object> Parameters { get; set; }
+
+        public bool CanBeCanceled { get; set; }
     }
 }

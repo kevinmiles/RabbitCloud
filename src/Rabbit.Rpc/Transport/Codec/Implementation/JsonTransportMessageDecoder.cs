@@ -20,6 +20,10 @@ namespace Rabbit.Rpc.Transport.Codec.Implementation
             {
                 message.Content = JsonConvert.DeserializeObject<RemoteInvokeResultMessage>(message.Content.ToString());
             }
+            if (message.IsCancelMessage())
+            {
+                message.Content = JsonConvert.DeserializeObject<RemoteCancelMessage>(message.Content.ToString());
+            }
             return message;
         }
 
