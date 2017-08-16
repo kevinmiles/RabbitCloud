@@ -46,15 +46,16 @@ namespace Rabbit.Rpc.Runtime.Server.Implementation
 
             if (!message.IsInvokeMessage())
             {
-                if (!message.IsCancelMessage())
-                    return;
-
-                CancellationTokenSource cts;
-                if (_cancellationDictionary.TryGetValue(message.Id, out cts))
+                if (message.IsCancelMessage())
                 {
-                    cts.Cancel();
-                    cts.Dispose();
+                    CancellationTokenSource cts;
+                    if (_cancellationDictionary.TryGetValue(message.Id, out cts))
+                    {
+                        cts.Cancel();
+                        cts.Dispose();
+                    }
                 }
+                return;
             }
 
             RemoteInvokeMessage remoteInvokeMessage;
