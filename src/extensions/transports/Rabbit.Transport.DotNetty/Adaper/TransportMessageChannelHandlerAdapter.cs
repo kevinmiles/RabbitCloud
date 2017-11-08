@@ -18,7 +18,8 @@ namespace Rabbit.Transport.DotNetty.Adaper
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
             var buffer = (IByteBuffer)message;
-            var data = buffer.ToArray();
+            var data = new byte[buffer.ReadableBytes];
+            buffer.ReadBytes(data);
             buffer.Release();
             var transportMessage = _transportMessageDecoder.Decode(data);
             context.FireChannelRead(transportMessage);
